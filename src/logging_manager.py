@@ -1,0 +1,26 @@
+import logging
+from logging import Logger
+
+
+# TODO: Переезд в другой модуль
+LIB_NAME = "fiber"
+
+
+class LoggingManager:
+    @classmethod
+    def get_main_logger(cls) -> Logger:
+        return logging.getLogger(LIB_NAME)
+
+    @classmethod
+    def get_main_module_logger(cls) -> Logger:
+        return cls.get_main_logger().getChild("module")
+
+    @classmethod
+    def get_kernel_logger(cls) -> Logger:
+        main_logger = cls.get_main_logger()
+        return main_logger.getChild("kernel")
+
+    @classmethod
+    # TODO: надо пидумать как передовать логгер разработчику, так что пока getChild пустой
+    def get_module_logger(cls, module_name: str) -> Logger:
+        return cls.get_main_module_logger().getChild(module_name)
