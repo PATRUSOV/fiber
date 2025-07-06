@@ -38,6 +38,7 @@ class Dispatcher:
     #       +Проверка типов не поддерживает None и Any за счет того что это объекты
     #       +Что если после yield ничего не будет?
     #       +Что если будет yield и потом return, или наоборот?
+    #       +В yield должен быть break иначе while True
     def _execute(self, call_node: CallNode, data: Any) -> None:
         """
         Рекурсивная функция, обхода CallNode. Передает данные между листами спика.
