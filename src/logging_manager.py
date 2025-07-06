@@ -1,15 +1,13 @@
 import logging
 from logging import Logger
 
-
-# TODO: Переезд в другой модуль
-LIB_NAME = "fiber"
+from src import __appname__
 
 
 class LoggingManager:
     @classmethod
     def get_main_logger(cls) -> Logger:
-        return logging.getLogger(LIB_NAME)
+        return logging.getLogger(__appname__)
 
     @classmethod
     def get_main_module_logger(cls) -> Logger:
