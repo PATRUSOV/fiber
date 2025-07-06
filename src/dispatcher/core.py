@@ -1,10 +1,10 @@
 from typing import Type, Generator, Tuple, Any
 
-from src.core.step import Step
-from src.core.collections import get_call_head, CallNode
-from src.core.configurator import DispatcherConfigurator
-from src.core.logging_manager import LoggingManager
-from src.core.utils.func import get_step_types
+from src.step import Step
+from src.collections import get_call_head, CallNode
+from src.configurator import DispatcherConfigurator
+from src.logging_manager import LoggingManager
+from src.utils.func import get_step_types
 
 
 class Dispatcher:
@@ -12,7 +12,11 @@ class Dispatcher:
     Класс является исполняющим ядром для классов реализующих интерфейс Step.
     """
 
-    def __init__(self, steps: Tuple[Type[Step], ...], configurator: DispatcherConfigurator = DispatcherConfigurator()):
+    def __init__(
+        self,
+        steps: Tuple[Type[Step], ...],
+        configurator: DispatcherConfigurator = DispatcherConfigurator(),
+    ):
         # голова связного списка
         self._call_ll_head = get_call_head(steps)
         self._configurator = configurator  # TODO: add impl
@@ -49,7 +53,9 @@ class Dispatcher:
         Returns:
             Ничего, т.к. предусмотреног что все дейсвия выполняються через FIXME: конвеер
         """
-        self._logger.debug(f"Начался поток выполненения. Начальный шаг {call_node.cls.__name__}.")
+        self._logger.debug(
+            f"Начался поток выполненения. Начальный шаг {call_node.cls.__name__}."
+        )
         while call_node is not None:
             module_logger = call_node.cls.logger
 
@@ -58,7 +64,9 @@ class Dispatcher:
             if issubclass(call_node.cls, Step):
                 input_type, output_type = get_step_types(call_node.cls)
             else:
-                error_mes = f"Шаг {call_node.cls.__name__} не являеться наследником Step"
+                error_mes = (
+                    f"Шаг {call_node.cls.__name__} не являеться наследником Step"
+                )
                 self._logger.fatal(error_mes)
                 raise TypeError(error_mes)
 
@@ -66,9 +74,7 @@ class Dispatcher:
             module_logger.debug(f"Стартовые данные: {data}")
 
             if not isinstance(data, input_type):
-                error_mes = (
-                    f"{input_type} - ожидаемый тип входных данных. Не совпал, с типом полученных данных - {type(data)}"
-                )
+                error_mes = f"{input_type} - ожидаемый тип входных данных. Не совпал, с типом полученных данных - {type(data)}"
                 module_logger.fatal(error_mes)
                 raise TypeError(error_mes)
 
@@ -84,9 +90,7 @@ class Dispatcher:
             if isinstance(output, Generator):
                 for ret in output:
                     if not isinstance(ret, output_type):
-                        error_mes = (
-                            f"{output_type} - ожидаемый тип выходных данных (yield). Не совпал с типом: {type(ret)}"
-                        )
+                        error_mes = f"{output_type} - ожидаемый тип выходных данных (yield). Не совпал с типом: {type(ret)}"
                         module_logger.fatal(error_mes)
                         raise TypeError(error_mes)
 
@@ -94,9 +98,7 @@ class Dispatcher:
                     self._execute(call_node.next, ret)
             else:
                 if not isinstance(output, output_type):
-                    error_mes = (
-                        f"{output_type} - ожидаемый тип выходных данных (return). Не совпал с типом: {type(output)}"
-                    )
+                    error_mes = f"{output_type} - ожидаемый тип выходных данных (return). Не совпал с типом: {type(output)}"
                     module_logger.fatal(error_mes)
                     raise TypeError(error_mes)
 

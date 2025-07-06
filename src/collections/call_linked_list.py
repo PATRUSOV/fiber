@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional, Type, Union, List, Tuple
 
-from src.core.step import Step
+from src.step import Step
 
 
 @dataclass

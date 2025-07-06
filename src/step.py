@@ -2,7 +2,7 @@ from abc import abstractmethod, ABC
 from logging import Logger
 from typing import Generic, TypeVar, Generator, Union
 
-from src.core.logging_manager import LoggingManager
+from src.logging_manager import LoggingManager
 
 I = TypeVar("I")
 O = TypeVar("O")

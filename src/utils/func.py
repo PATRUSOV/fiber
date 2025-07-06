@@ -1,5 +1,5 @@
 from typing import Tuple, get_args, get_origin, Any, Type
-from src.core.step import Step
+from src.step import Step
 
 
 def get_step_types(cls: Step) -> Tuple[Type[Any], Type[Any]]:
