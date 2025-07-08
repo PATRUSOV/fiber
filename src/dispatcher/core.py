@@ -1,4 +1,6 @@
+from logging import Logger
 from typing import Type, Generator, Tuple, Any
+from queue import Queue
 
 from src.step import Step
 from src.collections import get_call_head, CallNode
@@ -15,7 +17,9 @@ class Dispatcher:
     def __init__(
         self,
         steps: Tuple[Type[Step], ...],
-        configurator: DispatcherConfigurator = DispatcherConfigurator(),
+        configurator: DispatcherConfigurator = DispatcherConfigurator(
+            THREADS=1, MAX_TASKS=30
+        ),
     ):
         # голова связного списка
         self._call_ll_head = get_call_head(steps)
@@ -59,25 +63,12 @@ class Dispatcher:
         )
         while call_node is not None:
             module_logger = call_node.cls.logger
+            input_type, output_type = self._get_step_types(call_node.cls)
 
-            input_type = Type[Any]
-            output_type = Type[Any]
-            if issubclass(call_node.cls, Step):
-                input_type, output_type = get_step_types(call_node.cls)
-            else:
-                error_mes = (
-                    f"Шаг {call_node.cls.__name__} не являеться наследником Step"
-                )
-                self._logger.fatal(error_mes)
-                raise TypeError(error_mes)
+            self._check_input_data(data, input_type, module_logger)
 
             module_logger.info("Вызван метод start()!")
             module_logger.debug(f"Стартовые данные: {data}")
-
-            if not isinstance(data, input_type):
-                error_mes = f"{input_type} - ожидаемый тип входных данных. Не совпал, с типом полученных данных - {type(data)}"
-                module_logger.fatal(error_mes)
-                raise TypeError(error_mes)
 
             try:
                 output = call_node.cls.start(data)
@@ -90,19 +81,35 @@ class Dispatcher:
 
             if isinstance(output, Generator):
                 for ret in output:
-                    if not isinstance(ret, output_type):
-                        error_mes = f"{output_type} - ожидаемый тип выходных данных (yield). Не совпал с типом: {type(ret)}"
-                        module_logger.fatal(error_mes)
-                        raise TypeError(error_mes)
+                    self._check_output_data(ret, output_type, module_logger)
 
                     module_logger.debug("Породил поток выполнения.")
                     self._execute(call_node.next, ret)
+                break  # TODO: think about it (._.)
             else:
-                if not isinstance(output, output_type):
-                    error_mes = f"{output_type} - ожидаемый тип выходных данных (return). Не совпал с типом: {type(output)}"
-                    module_logger.fatal(error_mes)
-                    raise TypeError(error_mes)
-
                 data = output
+                self._check_output_data(data, output_type, module_logger)
                 call_node = call_node.next
         self._logger.info("Поток выполения завершён.")
+
+    def _get_step_types(self, step: Type[Step]) -> Tuple[Type[Any], Type[Any]]:
+        if issubclass(step, Step):
+            return get_step_types(step)
+        else:
+            error_mes = f"Шаг {step.__name__} не являеться наследником Step"
+            self._logger.fatal(error_mes)
+            raise TypeError(error_mes)
+
+    def _check_input_data(
+        self, data: Any, expected_type: Type[Any], logger: Logger
+    ) -> None:
+        if not isinstance(data, expected_type):
+            error_mes = f"{expected_type} - ожидаемый тип входных данных. Не совпал, с типом полученных данных - {type(data)}"
+            logger.fatal(error_mes)
+            raise TypeError(error_mes)
+
+    def _check_output_data(self, data: Any, expected_type: Type[Any], logger: Logger):
+        if not isinstance(data, expected_type):
+            error_mes = f"{expected_type} - ожидаемый тип выходных данных (return). Не совпал с типом: {type(data)}"
+            logger.fatal(error_mes)
+            raise TypeError(error_mes)
