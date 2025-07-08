@@ -39,6 +39,7 @@ class Step(ABC, Generic[I, O]):
         >>>         return Anything()
 
         >>>     # или так:
+        >>>     @staticmethod
         >>>     def start(data: Something) -> Generator[Anything, None, None]:
 
         >>>         some_data_arr = [Anything(), Anything()]
