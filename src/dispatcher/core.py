@@ -1,6 +1,7 @@
 from logging import Logger
 from typing import Type, Generator, Tuple, Any
 from queue import Queue
+from threading import Thread
 
 from src.step import Step
 from src.collections import get_call_head, CallNode
@@ -23,8 +24,12 @@ class Dispatcher:
     ):
         # голова связного списка
         self._call_ll_head = get_call_head(steps)
-        self._configurator = configurator  # TODO: add impl
+        self._configurator = configurator
         self._logger = LoggingManager.get_kernel_logger()
+        self._call_queue = Queue()
+
+    def _worker(self, call_node: CallNode, data: Any) -> None:
+
 
     def run(self) -> None:
         self._logger.info("Приложение запущено.")
@@ -37,12 +42,10 @@ class Dispatcher:
     #       +Ограничитель глубины рекурсии и потоков
     #       +Блокирующая очередь
     #       +Рефокторинг
-    #       +Декомпозиция проверки типов
     # FIXME:
     #       +Проверка типов не поддерживает None и Any за счет того что это объекты
     #       +Что если после yield ничего не будет?
     #       +Что если будет yield и потом return, или наоборот?
-    #       +В yield должен быть break иначе while True
     def _execute(self, call_node: CallNode, data: Any) -> None:
         """
         Рекурсивная функция, обхода CallNode. Передает данные между листами спика.
@@ -92,24 +95,3 @@ class Dispatcher:
                 call_node = call_node.next
         self._logger.info("Поток выполения завершён.")
 
-    def _get_step_types(self, step: Type[Step]) -> Tuple[Type[Any], Type[Any]]:
-        if issubclass(step, Step):
-            return get_step_types(step)
-        else:
-            error_mes = f"Шаг {step.__name__} не являеться наследником Step"
-            self._logger.fatal(error_mes)
-            raise TypeError(error_mes)
-
-    def _check_input_data(
-        self, data: Any, expected_type: Type[Any], logger: Logger
-    ) -> None:
-        if not isinstance(data, expected_type):
-            error_mes = f"{expected_type} - ожидаемый тип входных данных. Не совпал, с типом полученных данных - {type(data)}"
-            logger.fatal(error_mes)
-            raise TypeError(error_mes)
-
-    def _check_output_data(self, data: Any, expected_type: Type[Any], logger: Logger):
-        if not isinstance(data, expected_type):
-            error_mes = f"{expected_type} - ожидаемый тип выходных данных (return). Не совпал с типом: {type(data)}"
-            logger.fatal(error_mes)
-            raise TypeError(error_mes)
