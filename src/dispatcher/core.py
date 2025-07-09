@@ -59,11 +59,11 @@ class Dispatcher:
             Ничего, т.к. предусмотреног что все дейсвия выполняються через FIXME: конвеер
         """
         self._logger.debug(
-            f"Начался поток выполненения. Начальный шаг {call_node.cls.__name__}."
+            f"Начался поток выполненения. Начальный шаг {call_node.step.__name__}."
         )
         while call_node is not None:
-            module_logger = call_node.cls.logger
-            input_type, output_type = self._get_step_types(call_node.cls)
+            module_logger = call_node.step.logger
+            input_type, output_type = self._get_step_types(call_node.step)
 
             self._check_input_data(data, input_type, module_logger)
 
@@ -71,7 +71,7 @@ class Dispatcher:
             module_logger.debug(f"Стартовые данные: {data}")
 
             try:
-                output = call_node.cls.start(data)
+                output = call_node.step.start(data)
             except Exception as e:
                 module_logger.fatal(f"Критическая ошибка: {e}")
                 self._logger.info("Программа завершена.")

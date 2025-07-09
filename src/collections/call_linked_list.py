@@ -15,7 +15,7 @@ class CallNode:
         next: Следующий вызов.
     """
 
-    cls: Type[Step]
+    step: Type[Step]
     next: Optional["CallNode"]
 
 
