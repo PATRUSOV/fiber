@@ -50,6 +50,9 @@ class Task(Generic[I, O]):
             Union[Task, _TaskEndSentinel]:
                 - Новый Task с выходными данными, если выполнение продолжается.
                 - TASK_END, если генератор исчерпан или текущая вершина последняя.
+
+        Raises:
+            RuntimeError: при попытке вызвать Step у уже завершенного таска.
         """
         if self._is_done:
             error_msg = "Нельзя вызвать step() у завершённого Task."
