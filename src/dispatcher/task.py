@@ -1,44 +1,87 @@
-from typing import Any, Tuple, Type, Union, get_args, Generator, get_origin, Final
+from typing import Any, Type, Union, Generator, Final, Generic
+from enum import Enum, auto
 
-from src.step import Step
+from src.step.types import I, O, get_step_types
 from src.logging_manager import LoggingManager
 from src.collections import CallNode
 
 
-class _TaskEndSentinel: ...
+class _TaskEndSentinel:
+    """
+    Сентинел-объект, обозначающий завершение исполнения задачи (Task).
+    Используется как флаг окончания исполнения цепочки шагов.
+    """
 
 
+# Обозначает конец исполнения Task()
 TASK_END: Final = _TaskEndSentinel()
 
 
-class Task:
-    def __init__(self, call_node: CallNode, payload: Any):
+class Task(Generic[I, O]):
+    """
+    Представляет собой универсальную и самодостаточную единицу исполнения.
+    Связывает шаг (Step), его входные данные и следующую вершину вызова (CallNode).
+
+    Отвечает за поэтапное выполнение метода Step.start(), включая генерацию
+    следующих Task-ов и завершение цепочки.
+    """
+
+    def __init__(self, call_node: CallNode[I, O], payload: I):
+        """
+        Инициализация задачи.
+
+        Args:
+            call_node (CallNode): Текущая вершина вызова, содержащая Step и ссылку на следующую.
+            payload (I): Входные данные, передаваемые в Step.start().
+        """
         self._call_node = call_node
         self._payload = payload
         self._kernel_logger = LoggingManager.get_kernel_logger()
-        self._generator = None
-        self._input_type, self._output_type = self._get_step_types(self._call_node.step)
+        self._is_done = False
+        self._generator = None  # Отложенно инициализируемый генератор
+        self._input_type, self._output_type = get_step_types(self._call_node.step)
 
     def step(self) -> Union["Task", _TaskEndSentinel]:
+        """
+        Выполняет один шаг исполнения. Получает следующее значение от Step.start(),
+        проверяет его тип и возвращает новый Task, либо TASK_END, если исполнение завершено.
+
+        Returns:
+            Union[Task, _TaskEndSentinel]:
+                - Новый Task с выходными данными, если выполнение продолжается.
+                - TASK_END, если генератор исчерпан или текущая вершина последняя.
+        """
+        if self._is_done:
+            error_msg = "Нельзя вызвать step() у завершённого Task."
+            self._call_node.step.logger.fatal(error_msg)
+            raise RuntimeError(error_msg)
+
         if self._generator is None:
             self._generator = self._initialize_generator()
 
         try:
             data = next(self._generator)
         except StopIteration:
+            self._is_done = True
             return TASK_END
 
-        self._check_output_data(data, self._output_type)
+        self._check_data(data, self._output_type, self._IorO.O)
 
-        # вызываеться после проверки, что-бы убедиться что возвращаемое последним шагом значение,
-        # являеться - None.
         if self._call_node.next is None:
+            self._is_done = True
             return TASK_END
 
         return Task(self._call_node.next, data)
 
-    def _initialize_generator(self) -> Generator[Any, None, None]:
-        self._check_input_data(self._payload, self._input_type)
+    def _initialize_generator(self) -> Generator[O, None, None]:
+        """
+        Инициализирует генератор из метода Step.start(), обеспечивая поэтапную обработку
+        входных данных с возможностью yield или прямого return.
+
+        Returns:
+            Generator[O, None, None]: генератор выходных значений.
+        """
+        self._check_data(self._payload, self._input_type, self._IorO.I)
 
         self._call_node.step.logger.info("Вызван метод start()!")
         self._call_node.step.logger.debug(f"Стартовые данные: {self._payload}")
@@ -54,42 +97,46 @@ class Task:
 
         if isinstance(output, Generator):
             generator = output
-            while True:
-                try:
-                    ret = next(generator)
-                except StopIteration:
-                    break
-                except Exception as e:
-                    self._call_node.step.logger.fatal(f"Критическая ошибка: {e}")
-                    self._kernel_logger.info("Программа завершена.")
-                    raise
-                yield ret
+            try:
+                yield from generator
+            except Exception as e:
+                self._call_node.step.logger.fatal(f"Критическая ошибка: {e}")
+                self._kernel_logger.info("Программа завершена.")
+                raise
         else:
-            ret = output
-            yield ret
+            yield output
 
-    def _get_step_types(self, step: Type[Step]) -> Tuple[Type[Any], Type[Any]]:
-        if issubclass(step, Step):
-            bases = getattr(step, "__orig_bases__", [])
-            for base_cls in bases:
-                if get_origin(base_cls) is Step:
-                    input_type, output_type = get_args(base_cls)
-                    return input_type, output_type
+    class _IorO(Enum):
+        """
+        Перечисление, определяющее направление проверки типов:
+            - I: проверка входных данных
+            - O: проверка выходных данных
+        """
 
-        error_mes = f"Шаг {step.__name__} не являеться наследником Step"
-        self._kernel_logger.fatal(error_mes)
-        raise TypeError(error_mes)
+        I = auto()
+        O = auto()
 
-    # TODO: Возможно вынести фцнкционал в отдельную фцнкцию
-    # FIXME: Слабое место проверка на None, Any и и.д.
-    def _check_input_data(self, data: Any, expected_type: Type[Any]) -> None:
-        if not isinstance(data, expected_type):
-            error_mes = f"{expected_type} - ожидаемый тип входных данных. Не совпал, с типом полученных данных - {type(data)}"
-            self._call_node.step.logger.fatal(error_mes)
-            raise TypeError(error_mes)
+    def _check_data(
+        self, data: I | O, expected_type: Type[I | O], target_of_checking: _IorO
+    ) -> None:
+        """
+        Выполняет проверку типа данных (входных или выходных).
 
-    def _check_output_data(self, data: Any, expected_type: Type[Any]):
-        if not isinstance(data, expected_type):
-            error_mes = f"{expected_type} - ожидаемый тип выходных данных. Не совпал с типом: {type(data)}"
-            self._call_node.step.logger.fatal(error_mes)
-            raise TypeError(error_mes)
+        Args:
+            data (I | O): Проверяемое значение.
+            expected_type (Type): Ожидаемый тип, извлечённый из Step.
+            target_of_checking (_IorO): Указывает, что проверяется: вход или выход.
+
+        Raises:
+            TypeError: если тип `data` не соответствует ожидаемому.
+        """
+        if expected_type is not Any and not isinstance(
+            data, (type(None), expected_type)
+        ):
+            kind = "входных" if target_of_checking is self._IorO.I else "выходных"
+            error_msg = (
+                f"{expected_type} - ожидаемый тип {kind} данных. "
+                f"Не совпал с типом полученных данных - {type(data)}"
+            )
+            self._call_node.step.logger.fatal(error_msg)
+            raise TypeError(error_msg)
