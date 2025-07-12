@@ -1,7 +1,7 @@
-from typing import Any, Type, Union, Generator, Final, Generic
-from enum import Enum, auto
+from typing import Union, Generator, Final, Generic
 
 from src.step.types import I, O, get_step_types
+from src.utils.types import impr_isinstance
 from src.logging_manager import LoggingManager
 from src.collections import CallNode
 
@@ -68,7 +68,12 @@ class Task(Generic[I, O]):
             self._is_done = True
             return TASK_END
 
-        self._check_data(data, self._output_type, self._IorO.O)
+        impr_isinstance(
+            data=data,
+            expected_type=self._output_type,
+            error_msg=f"{self._output_type} - ожидаемый тип выходных данных. Не совпал с типом полученных данных - {type(data)}",
+            logger=self._call_node.step.logger,
+        )
 
         if self._call_node.next is None:
             self._is_done = True
@@ -84,7 +89,12 @@ class Task(Generic[I, O]):
         Returns:
             Generator[O, None, None]: генератор выходных значений.
         """
-        self._check_data(self._payload, self._input_type, self._IorO.I)
+        impr_isinstance(
+            data=self._payload,
+            expected_type=self._input_type,
+            error_msg=f"{self._input_type} - ожидаемый тип входных данных. Не совпал с типом полученных данных - {type(self._payload)}",
+            logger=self._call_node.step.logger,
+        )
 
         self._call_node.step.logger.info("Вызван метод start()!")
         self._call_node.step.logger.debug(f"Стартовые данные: {self._payload}")
@@ -108,38 +118,3 @@ class Task(Generic[I, O]):
                 raise
         else:
             yield output
-
-    class _IorO(Enum):
-        """
-        Перечисление, определяющее направление проверки типов:
-            - I: проверка входных данных
-            - O: проверка выходных данных
-        """
-
-        I = auto()
-        O = auto()
-
-    def _check_data(
-        self, data: I | O, expected_type: Type[I | O], target_of_checking: _IorO
-    ) -> None:
-        """
-        Выполняет проверку типа данных (входных или выходных).
-
-        Args:
-            data (I | O): Проверяемое значение.
-            expected_type (Type): Ожидаемый тип, извлечённый из Step.
-            target_of_checking (_IorO): Указывает, что проверяется: вход или выход.
-
-        Raises:
-            TypeError: если тип `data` не соответствует ожидаемому.
-        """
-        if expected_type is not Any and not isinstance(
-            data, (type(None), expected_type)
-        ):
-            kind = "входных" if target_of_checking is self._IorO.I else "выходных"
-            error_msg = (
-                f"{expected_type} - ожидаемый тип {kind} данных. "
-                f"Не совпал с типом полученных данных - {type(data)}"
-            )
-            self._call_node.step.logger.fatal(error_msg)
-            raise TypeError(error_msg)
