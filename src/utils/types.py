@@ -6,7 +6,7 @@ def impr_isinstance(
     data: Any, expected_type: Type[Any], error_msg: str, logger: Logger
 ) -> None:
     """
-    Выполняет проверку типа на принадлежность типу.
+    Выполняет проверку типа на принадлежность типу. При ошибке логгирует и выбрасывает исключение.
     Особенности:
         +data = None, expected_type = None => True
         +data = ..., expected_type = Any => True
