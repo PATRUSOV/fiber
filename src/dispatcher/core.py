@@ -1,11 +1,12 @@
-from typing import Type, Tuple, Any
+from typing import Type, Tuple
 from queue import Queue
 from threading import Thread
 
 from src.step import Step
-from src.collections import get_call_head, CallNode
+from src.collections import get_call_head
 from src.logging_manager import LoggingManager
 from src.dispatcher.configurator import DispatcherConfigurator
+from src.dispatcher.task import Task, TaskDone
 
 
 class Dispatcher:
@@ -20,12 +21,39 @@ class Dispatcher:
             THREADS=1, MAX_TASKS=30
         ),
     ):
-        # голова связного списка
+        # голова связного списка (call linked list head)
         self._call_ll_head = get_call_head(steps)
         self._configurator = configurator
         self._logger = LoggingManager.get_kernel_logger()
-        self._call_queue = Queue()
+        self._tqueue: Queue[Task] = Queue()
 
-    def _worker(self, call_node: CallNode, data: Any) -> None: ...
+    def _worker(self) -> None:
+        while True:
+            task = self._tqueue.get()
 
-    def run(self) -> None: ...
+            while True:
+                try:
+                    outp = task.step()
+                except TaskDone:
+                    break
+
+                self._tqueue.put(outp)
+
+            self._tqueue.task_done()
+
+    def run(self) -> None:
+        # инициализация очереди
+        start_task = Task(self._call_ll_head, None)
+        self._tqueue.put(start_task)
+
+        threads = []
+
+        for _ in range(self._configurator.THREADS):
+            thread = Thread(target=self._worker)
+            thread.start()
+            threads.append(thread)
+
+        self._tqueue.join()
+
+        for thread in threads:
+            thread.join()
