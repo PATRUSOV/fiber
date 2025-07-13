@@ -1,5 +1,4 @@
-from logging import Logger
-from typing import Type, Generator, Tuple, Any
+from typing import Type, Tuple, Any
 from queue import Queue
 from threading import Thread
 
