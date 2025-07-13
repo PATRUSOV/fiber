@@ -1,4 +1,4 @@
-from typing import Union, Generator, Final, Generic
+from typing import Generator, Generic
 
 from src.step.types import I, O, get_step_types
 from src.utils.types import impr_isinstance
@@ -6,15 +6,7 @@ from src.logging_manager import LoggingManager
 from src.collections import CallNode
 
 
-class _TaskEndSentinel:
-    """
-    Сентинел-объект, обозначающий завершение исполнения задачи (Task).
-    Используется как флаг окончания исполнения цепочки шагов.
-    """
-
-
-# Обозначает конец исполнения Task()
-TASK_END: Final = _TaskEndSentinel()
+class TaskDone(Exception): ...
 
 
 class Task(Generic[I, O]):
@@ -41,23 +33,19 @@ class Task(Generic[I, O]):
         self._generator = None  # Отложенно инициализируемый генератор
         self._input_type, self._output_type = get_step_types(self._call_node.step)
 
-    def step(self) -> Union["Task", _TaskEndSentinel]:
+    def step(self) -> "Task":
         """
         Выполняет один шаг исполнения. Получает следующее значение от Step.start(),
-        проверяет его тип и возвращает новый Task, либо TASK_END, если исполнение завершено.
+        проверяет его тип и возвращает новый Task.
 
         Returns:
-            Union[Task, _TaskEndSentinel]:
-                - Новый Task с выходными данными, если выполнение продолжается.
-                - TASK_END, если генератор исчерпан или текущая вершина последняя.
+            Task - Новый Task с выходными данными.
 
         Raises:
-            RuntimeError: при попытке вызвать Step у уже завершенного таска.
+            TaskDone: если генератор исчерпан или текущая вершина последняя.
         """
         if self._is_done:
-            error_msg = "Нельзя вызвать step() у завершённого Task."
-            self._call_node.step.logger.fatal(error_msg)
-            raise RuntimeError(error_msg)
+            raise TaskDone()
 
         if self._generator is None:
             self._generator = self._initialize_generator()
@@ -66,7 +54,7 @@ class Task(Generic[I, O]):
             data = next(self._generator)
         except StopIteration:
             self._is_done = True
-            return TASK_END
+            raise TaskDone()
 
         impr_isinstance(
             data=data,
@@ -77,7 +65,7 @@ class Task(Generic[I, O]):
 
         if self._call_node.next is None:
             self._is_done = True
-            return TASK_END
+            raise TaskDone()
 
         return Task(self._call_node.next, data)
 
