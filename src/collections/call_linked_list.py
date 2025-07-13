@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from logging import Logger
-from typing import Optional, Type, Union, List, Tuple, Generic, get_type_hints
+from typing import Optional, Type, Union, List, Tuple, Generic
 
 from src.step import Step
 from src.step.types import I, O, get_step_types
@@ -22,8 +22,6 @@ class CallNode(Generic[I, O]):
     next: Optional["CallNode"]
 
 
-# TODO:
-#   +Добавить проверкук типов первого и последнего типа.
 def get_call_head(steps: Union[List[Type[Step]], Tuple[Type[Step], ...]]) -> CallNode:
     """
     Преобразует [Список, Кортеж] в односвязный список.
