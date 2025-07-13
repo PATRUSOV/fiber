@@ -4,7 +4,7 @@ from threading import Thread
 
 from src.step import Step
 from src.collections import get_call_head
-from src.logging_manager import LoggingManager
+import src.logging_manager as lm
 from src.dispatcher.configurator import DispatcherConfigurator
 from src.dispatcher.task import Task, TaskDone
 
@@ -24,7 +24,7 @@ class Dispatcher:
         # голова связного списка (call linked list head)
         self._call_ll_head = get_call_head(steps)
         self._configurator = configurator
-        self._logger = LoggingManager.get_kernel_logger()
+        self._logger = lm.get_kernel_logger()
         self._tqueue: Queue[Task] = Queue()
 
     def _worker(self) -> None:

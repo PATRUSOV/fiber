@@ -1,15 +1,16 @@
+import src.logging_manager as lm
+
 from logging import Logger
 from typing import Type, Tuple, Any, TypeVar, Final, get_origin, get_args
 from src.step.core import Step
 
-from src.logging_manager import LoggingManager
 
 I: Final = TypeVar("I")
 O: Final = TypeVar("O")
 
 
 def get_step_types(
-    step: Type[Step[I, O]], logger: Logger = LoggingManager.get_kernel_logger()
+    step: Type[Step[I, O]], logger: Logger = lm.get_kernel_logger()
 ) -> Tuple[Type[Any], Type[Any]]:
     """
     Возвращает входной и выходной тип шага.

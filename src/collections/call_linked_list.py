@@ -4,7 +4,7 @@ from typing import Optional, Type, Union, List, Tuple, Generic
 
 from src.step import Step
 from src.step.types import I, O, get_step_types
-from src.logging_manager import LoggingManager
+import src.logging_manager as lm
 
 
 @dataclass
@@ -52,7 +52,7 @@ def get_call_head(steps: Union[List[Type[Step]], Tuple[Type[Step], ...]]) -> Cal
 
 def _check_first_and_last_steps_conract(
     steps: Union[List[Type[Step]], Tuple[Type[Step], ...]],
-    logger: Logger = LoggingManager.get_kernel_logger(),
+    logger: Logger = lm.get_kernel_logger(),
 ) -> None:
     """
     Проверяет что первый и последний элеметы групы соответсвуют guidline:

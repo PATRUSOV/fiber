@@ -2,7 +2,7 @@ from abc import abstractmethod, ABC
 from logging import Logger
 from typing import Generic, Generator, Union
 
-from src.logging_manager import LoggingManager
+import src.logging_manager as lm
 from src.step.types import I, O
 
 
@@ -86,4 +86,4 @@ class Step(ABC, Generic[I, O]):
     def __init_subclass__(cls, **kwargs) -> None:
         """Выдает шагу логгер"""
         super().__init_subclass__(**kwargs)
-        cls.logger = LoggingManager.get_module_logger(cls.__name__)
+        cls.logger = lm.get_module_logger(cls.__name__)
