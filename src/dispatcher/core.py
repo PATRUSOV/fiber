@@ -6,7 +6,7 @@ import src.logging_manager as lm
 
 from src.step import Step
 from src.collections import get_call_head
-from src.dispatcher.configurator import DispatcherConfigurator
+from src.dispatcher.configurator import DispatcherConfig
 from src.dispatcher.task import Task, TaskDone
 
 
@@ -18,13 +18,13 @@ class Dispatcher:
     def __init__(
         self,
         steps: Tuple[Type[Step], ...],
-        configurator: DispatcherConfigurator = DispatcherConfigurator(
-            THREADS=1, MAX_TASKS=30
+        config: DispatcherConfig = DispatcherConfig(
+            TASK_LIMIT=50, WORKERS=4, TASKS_PER_ITER=3
         ),
     ):
         # голова связного списка (call linked list head)
         self._call_ll_head = get_call_head(steps)
-        self._configurator = configurator
+        self._config = config
         self._logger = lm.get_kernel_logger()
         self._tqueue: Queue[Task] = Queue()
 
@@ -49,7 +49,7 @@ class Dispatcher:
 
         threads = []
 
-        for _ in range(self._configurator.THREADS):
+        for _ in range(self._config.WORKERS):
             thread = Thread(target=self._worker)
             thread.start()
             threads.append(thread)
