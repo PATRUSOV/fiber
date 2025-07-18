@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class DispatcherConfigurator:
-    THREADS: int
-    MAX_TASKS: int
+class DispatcherConfig:
+    TASK_LIMIT: int
+    WORKERS: int
+    TASKS_PER_ITER: int
