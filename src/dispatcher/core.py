@@ -2,9 +2,10 @@ from typing import Type, Tuple
 from queue import Queue
 from threading import Thread
 
+import src.logging_manager as lm
+
 from src.step import Step
 from src.collections import get_call_head
-import src.logging_manager as lm
 from src.dispatcher.configurator import DispatcherConfigurator
 from src.dispatcher.task import Task, TaskDone
 
