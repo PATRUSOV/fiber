@@ -33,6 +33,9 @@ class Task(Generic[I, O]):
         self._generator = None  # Отложенно инициализируемый генератор
         self._input_type, self._output_type = get_step_types(self._call_node.step)
 
+    def is_done(self) -> bool:
+        return self._is_done
+
     def step(self) -> "Task":
         """
         Выполняет один шаг исполнения. Получает следующее значение от Step.start(),
