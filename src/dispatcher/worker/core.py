@@ -3,10 +3,23 @@ from src.dispatcher.worker.context import WorkerContext
 
 
 class Worker:
+    """
+    Воркер для многопоточной обработки Task().
+    """
+
     def __init__(self, context: WorkerContext):
+        """
+        Создает воркера для многопоточной обработки Task().
+
+        Args:
+            context: Контекст в котором будет работать воркер (см. подробнее в доках к WorkerContext).
+        """
         self._context = context
 
     def run(self) -> None:
+        """
+        Запускает воркера (придназнаено для запуска в Thread()).
+        """
         while True:
             item = self._context.deque.get()
             if item is None:
