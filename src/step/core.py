@@ -1,11 +1,9 @@
 from abc import abstractmethod, ABC
 from logging import Logger
-from typing import Generic, TypeVar, Generator, Union
+from typing import Generic, Generator, Union
 
-from src.logging_manager import LoggingManager
-
-I = TypeVar("I")
-O = TypeVar("O")
+import src.logging_manager as lm
+from src.step.types import I, O
 
 
 class Step(ABC, Generic[I, O]):
@@ -15,8 +13,15 @@ class Step(ABC, Generic[I, O]):
     Следовательно данные получают в цепочке и работают с ними только там.
     То есть первый шаг принимает, а последний возвращает None.
 
+    - Многопоточность: шаги могут исполнятся как и в одном потоке так и в нескольких.
+    Тобиш развилки (yield) можно распараллелить. Но отвсетсвенность за ресурсы,
+    к которым могут попытаться обратиться сразу несколько шагов из нескольких потоков одновременно (например:
+    файлы, базы данных и т.д.), полностью лежит на mutex-ах, очередях и прочих ThreadSafe механизмах, реализованных внутри шагов.
+
     Attributes:
         start(): абстрактный статический метод, вызываемый у наследника при выполнении цепочки.
+        logger (Logger): Логгер выделяемый шагу. Рекомнедуется при разработки ипользовать именно его
+        и его наследников для централизованого и безопасного логгирования.
 
     Example:
 
@@ -32,6 +37,7 @@ class Step(ABC, Generic[I, O]):
         >>>         return Anything()
 
         >>>     # или так:
+        >>>     @staticmethod
         >>>     def start(data: Something) -> Generator[Anything, None, None]:
 
         >>>         some_data_arr = [Anything(), Anything()]
@@ -56,11 +62,11 @@ class Step(ABC, Generic[I, O]):
 
         Returns:
             O или Generator[O, None, None]:
-                - Если возвращается StepResult — шаг выполняется один раз и передаёт результат дальше.
+                - Если возвращается O — шаг выполняется один раз и передаёт результат дальше.
                 - Если используется yield и возвращается генератор — шаг может передать несколько результатов.
 
         Особенности yield:
-            - Каждый yield сразу запускает **все оставшиеся шаги в цепочке**, начиная со следующего.
+            - Каждый yield запускает все оставшиеся шаги в цепочке, начиная со следующего.
             - После завершения цепочки пайплайн возвращается к текущему шагу и продолжает генератор.
             - Так продолжается, пока генератор не будет исчерпан.
             - Это позволяет реализовать разветвлённую или поэтапную обработку данных с минимальной связностью.
@@ -68,15 +74,16 @@ class Step(ABC, Generic[I, O]):
         Пример:
 
             # Возвращает один результат — шаг завершает выполнение:
-            return StepResult(result)
+            return result
 
             # Возвращает генератор — шаг вызывает оставшуюся цепочку несколько раз:
-            yield StepResult(part1)  # Вся цепочка выполняется с part1
-            yield StepResult(part2)  # Затем снова с part2
-            yield StepResult(part3)  # И так далее...
+            yield part1  # Вся цепочка выполняется с part1
+            yield part2  # Затем снова с part2
+            yield part3  # И так далее...
 
         """
 
     def __init_subclass__(cls, **kwargs) -> None:
+        """Выдает шагу логгер"""
         super().__init_subclass__(**kwargs)
-        cls.logger = LoggingManager.get_module_logger(cls.__name__)
+        cls.logger = lm.get_module_logger(cls.__name__)
