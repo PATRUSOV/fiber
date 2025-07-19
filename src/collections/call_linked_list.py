@@ -22,12 +22,15 @@ class CallNode(Generic[I, O]):
     next: Optional["CallNode"]
 
 
-def get_call_head(steps: Sequence[Type[Step]]) -> CallNode:
+def get_call_head(
+    steps: Sequence[Type[Step]], logger: Logger = lm.get_kernel_logger()
+) -> CallNode:
     """
     Преобразует последовательность из Type[Step] в односвязный список из CallNode.
 
     Args:
         steps: Последовательность из статических классов реализующих Step.
+        logger: Логгер используемый функцией.
 
     Return:
         Голову связного списка.
@@ -35,7 +38,9 @@ def get_call_head(steps: Sequence[Type[Step]]) -> CallNode:
     _check_first_and_last_steps_conract(steps)
 
     if len(steps) == 0:
-        raise ValueError("Нельзя создать список из пустого кортежа")
+        err_msg = "Нельзя создать список из пустой последовательности."
+        logger.fatal(err_msg)
+        raise ValueError(err_msg)
 
     head_node = CallNode(steps[0], None)
 
@@ -60,6 +65,7 @@ def _check_first_and_last_steps_conract(
 
     Arguments:
         steps: Последовательность из статических классов реализующих Step.
+        logger: Логгер используемый функцией.
 
     Raises:
         TypeError: Если шаг нарушил конракт.
