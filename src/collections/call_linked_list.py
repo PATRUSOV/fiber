@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from logging import Logger
-from typing import Optional, Type, Union, List, Tuple, Generic
+from typing import Optional, Type, Generic, Sequence
 
 from src.step import Step
 from src.step.types import I, O, get_step_types
@@ -22,7 +22,7 @@ class CallNode(Generic[I, O]):
     next: Optional["CallNode"]
 
 
-def get_call_head(steps: Union[List[Type[Step]], Tuple[Type[Step], ...]]) -> CallNode:
+def get_call_head(steps: Sequence[Type[Step]]) -> CallNode:
     """
     Преобразует [Список, Кортеж] в односвязный список.
 
@@ -51,7 +51,7 @@ def get_call_head(steps: Union[List[Type[Step]], Tuple[Type[Step], ...]]) -> Cal
 
 
 def _check_first_and_last_steps_conract(
-    steps: Union[List[Type[Step]], Tuple[Type[Step], ...]],
+    steps: Sequence[Type[Step]],
     logger: Logger = lm.get_kernel_logger(),
 ) -> None:
     """
