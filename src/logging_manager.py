@@ -2,6 +2,10 @@ import logging
 
 from src import __appname__
 
+# TODO:
+# + Добавить документация
+# + Предоставить удобный апи для настройки логгера.
+
 
 def get_main_logger() -> logging.Logger:
     return logging.getLogger(__appname__)
