@@ -5,7 +5,7 @@ import src.logging_manager as lm
 
 from src.step import Step
 from src.collections import get_call_head, ThreadSafeDeque
-from src.dispatcher.configurator import DispatcherConfig
+from src.dispatcher.config import DispatcherConfig
 from src.dispatcher.task import Task
 from src.dispatcher.worker import Worker, WorkerContext
 
