@@ -1,4 +1,4 @@
-from typing import Type, Tuple
+from typing import Type, Sequence
 from threading import Thread
 
 import src.logging_manager as lm
@@ -12,16 +12,27 @@ from src.dispatcher.worker import Worker, WorkerContext
 
 class Dispatcher:
     """
-    Класс является исполняющим ядром для классов реализующих интерфейс Step.
+    Исполняющим ядром для классов реализующих интерфейс Step.
+    Отвечает за создание цепочек из Step, и управление многопотоком.
     """
+
+    # FIXME::
+    # +Вынести инициализацию очереди в __init__
 
     def __init__(
         self,
-        step_puls: Tuple[Tuple[Type[Step], ...], ...],
+        step_puls: Sequence[Sequence[Type[Step]]],
         config: DispatcherConfig = DispatcherConfig(
             TASK_LIMIT=50, WORKERS=4, TASKS_PER_ITER=3
         ),
     ):
+        """
+        Создает объект-диспетчера для кправления Step-цепочками.
+
+        Args:
+            step_puls: Последовательность с последовательностями из шагов.
+            config: Объект конфигурации (см. подробнее в его доках).
+        """
         # голова связного списка (call linked list head)
         self._call_ll_heads = []
 
@@ -35,6 +46,9 @@ class Dispatcher:
         self._tdeque: ThreadSafeDeque[Task | None] = ThreadSafeDeque()
 
     def run(self) -> None:
+        """
+        Запускает обработку шагов.
+        """
         # инициализация очереди
         for call_ll_head in self._call_ll_heads:
             start_task = Task(call_ll_head, None)
