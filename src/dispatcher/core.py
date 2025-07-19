@@ -1,13 +1,13 @@
 from typing import Type, Tuple
-from queue import Queue
 from threading import Thread
 
 import src.logging_manager as lm
 
 from src.step import Step
-from src.collections import get_call_head
+from src.collections import get_call_head, ThreadSafeDeque
 from src.dispatcher.configurator import DispatcherConfig
-from src.dispatcher.task import Task, TaskDone
+from src.dispatcher.task import Task
+from src.dispatcher.worker import Worker, WorkerContext
 
 
 class Dispatcher:
@@ -17,44 +17,46 @@ class Dispatcher:
 
     def __init__(
         self,
-        steps: Tuple[Type[Step], ...],
+        step_puls: Tuple[Tuple[Type[Step], ...], ...],
         config: DispatcherConfig = DispatcherConfig(
             TASK_LIMIT=50, WORKERS=4, TASKS_PER_ITER=3
         ),
     ):
         # голова связного списка (call linked list head)
-        self._call_ll_head = get_call_head(steps)
+        self._call_ll_heads = []
+
+        # компиляциия в CallNode-ы
+        for steps in step_puls:
+            call_linked_list_head = get_call_head(steps)
+            self._call_ll_heads.append(call_linked_list_head)
+
         self._config = config
         self._logger = lm.get_kernel_logger()
-        self._tqueue: Queue[Task] = Queue()
-
-    def _worker(self) -> None:
-        while True:
-            task = self._tqueue.get()
-
-            while True:
-                try:
-                    outp = task.step()
-                except TaskDone:
-                    break
-
-                self._tqueue.put(outp)
-
-            self._tqueue.task_done()
+        self._tdeque: ThreadSafeDeque[Task | None] = ThreadSafeDeque()
 
     def run(self) -> None:
         # инициализация очереди
-        start_task = Task(self._call_ll_head, None)
-        self._tqueue.put(start_task)
+        for call_ll_head in self._call_ll_heads:
+            start_task = Task(call_ll_head, None)
+            self._tdeque.put(start_task)
 
         threads = []
 
         for _ in range(self._config.WORKERS):
-            thread = Thread(target=self._worker)
+            context = WorkerContext(
+                deque=self._tdeque,
+                deque_limit=self._config.TASK_LIMIT,
+                max_tasks_per_iter=self._config.TASKS_PER_ITER,
+            )
+            worker = Worker(context)
+            thread = Thread(target=worker.run)
             thread.start()
             threads.append(thread)
 
-        self._tqueue.join()
+        self._tdeque.join()
+
+        for _ in range(len(threads)):
+            self._tdeque.put(None)
 
         for thread in threads:
             thread.join()
