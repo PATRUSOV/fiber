@@ -34,6 +34,10 @@ class Task(Generic[I, O]):
         self._input_type, self._output_type = get_step_types(self._call_node.step)
 
     def is_done(self) -> bool:
+        """
+        Returns:
+            bool: Завершена ли задача.
+        """
         return self._is_done
 
     def step(self) -> "Task":
