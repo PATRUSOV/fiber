@@ -30,15 +30,19 @@ class Dispatcher:
             step_puls: Последовательность с последовательностями из шагов.
             config: Объект конфигурации (см. подробнее в его доках).
         """
+
+        self._logger = lm.get_kernel_logger()
+        self._config = config
+        self._tdeque: ThreadSafeDeque[Task | None] = ThreadSafeDeque()
+
+        self._logger.debug("Создан Dispatcher.")
+
         # компиляциия в CallNode-ы и загрузка очереди ими.
         for steps in step_puls:
             call_ll_head = get_call_head(steps)
             task = Task(call_ll_head, None)
             self._tdeque.put(task)
-
-        self._config = config
-        self._logger = lm.get_kernel_logger()
-        self._tdeque: ThreadSafeDeque[Task | None] = ThreadSafeDeque()
+        self._logger.debug("Step успешно преобразованы в Task-и.")
 
     def run(self) -> None:
         """
@@ -46,7 +50,9 @@ class Dispatcher:
         """
         threads = []
 
-        for _ in range(self._config.WORKERS):
+        workers = self._config.WORKERS
+        self._logger.debug("Создание Worker-ов...")
+        for _ in range(workers):
             context = WorkerContext(
                 deque=self._tdeque,
                 deque_limit=self._config.TASK_LIMIT,
@@ -56,11 +62,15 @@ class Dispatcher:
             thread = Thread(target=worker.run)
             thread.start()
             threads.append(thread)
+            self._logger.debug("Воркеры успешно созданы.")
 
         self._tdeque.join()
+        self._logger.debug("Все Task-и выполнены. Очередь пуста.")
 
+        self._logger.debug("Остановка Worker-ов...")
         for _ in range(len(threads)):
             self._tdeque.put(None)
 
         for thread in threads:
             thread.join()
+        self._logger.debug("Worker-ы остановлены.")
