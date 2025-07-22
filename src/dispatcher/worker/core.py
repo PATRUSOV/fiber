@@ -15,7 +15,7 @@ class Worker:
             context: Контекст в котором будет работать воркер (см. подробнее в доках к WorkerContext).
         """
         self._context = context
-        self._context.logger.debug("Создан.")
+        self._context.logger.debug("Создан логгер.")
 
     def run(self) -> None:
         """

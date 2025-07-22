@@ -26,6 +26,9 @@ class WorkerContext:
         self.logger = get_worker_logger()
         self._deque_limit = deque_limit
         self._max_tasks_per_iter = max_tasks_per_iter
+        self.logger.debug(
+            f"Создан контекс выполнения. Лимит задач: {self._deque_limit}. Лимит генерации за обращение к очереди: {self._max_tasks_per_iter}. Лимит генерацииобращение к очереди: {self._max_tasks_per_iter}"
+        )
 
     def get_generation_limit(self) -> int:
         """
