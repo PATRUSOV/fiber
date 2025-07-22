@@ -39,7 +39,7 @@ def get_call_head(
 
     if len(steps) == 0:
         err_msg = "Нельзя создать список из пустой последовательности."
-        logger.fatal(err_msg)
+        logger.fatal(err_msg, exc_info=True)
         raise ValueError(err_msg)
 
     head_node = CallNode(steps[0], None)
@@ -82,7 +82,7 @@ def _check_first_and_last_steps_conract(
             base_err_msg
             + f"Тип принимаемых данных в первом шаге должен быть {magic_type}. Текущий тип: {start_step_inp_type}."
         )
-        logger.fatal(err_msg)
+        logger.fatal(err_msg, exc_info=True)
         raise TypeError(err_msg)
 
     # проверка возвращаемого значения в последем шаге
@@ -92,5 +92,5 @@ def _check_first_and_last_steps_conract(
             base_err_msg
             + f"Тип вовращаемых данных в последнем шаге должен быть {magic_type}. Текущий тип: {start_step_inp_type}."
         )
-        logger.fatal(err_msg)
+        logger.fatal(err_msg, exc_info=True)
         raise TypeError(err_msg)
