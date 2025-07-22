@@ -32,12 +32,12 @@ class Step(ABC, Generic[I, O]):
         >>> class TestingStep(Step[Something, Anything]):
 
         >>>     # start(), можно переопределить или так:
-        >>>     @staticmethod
+        >>>     @classmethod
         >>>     def start(data: Something) -> Anything:
         >>>         return Anything()
 
         >>>     # или так:
-        >>>     @staticmethod
+        >>>     @classmethod
         >>>     def start(data: Something) -> Generator[Anything, None, None]:
 
         >>>         some_data_arr = [Anything(), Anything()]
@@ -49,9 +49,9 @@ class Step(ABC, Generic[I, O]):
 
     logger: Logger
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def start(data: I) -> Union[O, Generator[O, None, None]]:
+    def start(cls, data: I) -> Union[O, Generator[O, None, None]]:
         """
         Абстрактный статический метод. Является основной точкой входа для каждого шага.
         В случае если шаг первый первый, то он не должен принимать None в качестве I, а если последний
