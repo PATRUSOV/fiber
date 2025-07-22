@@ -16,9 +16,6 @@ class Dispatcher:
     Отвечает за создание цепочек из Step, и управление многопотоком.
     """
 
-    # FIXME::
-    # +Вынести инициализацию очереди в __init__
-
     def __init__(
         self,
         step_puls: Sequence[Sequence[Type[Step]]],
@@ -33,13 +30,11 @@ class Dispatcher:
             step_puls: Последовательность с последовательностями из шагов.
             config: Объект конфигурации (см. подробнее в его доках).
         """
-        # голова связного списка (call linked list head)
-        self._call_ll_heads = []
-
-        # компиляциия в CallNode-ы
+        # компиляциия в CallNode-ы и загрузка очереди ими.
         for steps in step_puls:
-            call_linked_list_head = get_call_head(steps)
-            self._call_ll_heads.append(call_linked_list_head)
+            call_ll_head = get_call_head(steps)
+            task = Task(call_ll_head, None)
+            self._tdeque.put(task)
 
         self._config = config
         self._logger = lm.get_kernel_logger()
@@ -49,11 +44,6 @@ class Dispatcher:
         """
         Запускает обработку шагов.
         """
-        # инициализация очереди
-        for call_ll_head in self._call_ll_heads:
-            start_task = Task(call_ll_head, None)
-            self._tdeque.put(start_task)
-
         threads = []
 
         for _ in range(self._config.WORKERS):
