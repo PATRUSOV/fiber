@@ -86,4 +86,4 @@ class Step(ABC, Generic[I, O]):
     def __init_subclass__(cls, **kwargs) -> None:
         """Выдает шагу логгер"""
         super().__init_subclass__(**kwargs)
-        cls.logger = lm.get_module_logger(cls.__name__)
+        cls.logger = lm.get_main_step_logger().getChild(cls.__name__)
