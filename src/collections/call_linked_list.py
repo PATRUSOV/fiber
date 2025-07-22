@@ -4,7 +4,7 @@ from typing import Optional, Type, Generic, Sequence
 
 from src.step import Step
 from src.step.types import I, O, get_step_types
-import src.logging_manager as lm
+import src.logman as lm
 
 
 @dataclass

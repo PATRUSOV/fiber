@@ -1,4 +1,4 @@
-import logging_manager as lm
+import logman as lm
 
 from logging import Logger
 

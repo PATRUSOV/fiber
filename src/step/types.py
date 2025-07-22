@@ -1,4 +1,4 @@
-import src.logging_manager as lm
+import src.logman as lm
 
 from logging import Logger
 from typing import Type, Tuple, Any, TypeVar, Final, get_origin, get_args

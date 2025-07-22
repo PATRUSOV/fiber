@@ -1,7 +1,7 @@
 from typing import Type, Sequence
 from threading import Thread
 
-import src.logging_manager as lm
+import src.logman as lm
 
 from src.step import Step
 from src.collections import get_call_head, ThreadSafeDeque

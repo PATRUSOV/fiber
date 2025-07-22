@@ -2,7 +2,7 @@ from abc import abstractmethod, ABC
 from logging import Logger
 from typing import Generic, Generator, Union
 
-import src.logging_manager as lm
+import src.logman as lm
 from src.step.types import I, O
 
 
