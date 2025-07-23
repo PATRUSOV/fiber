@@ -1,12 +1,9 @@
 import src.logman as lm
 
-from logging import Logger
-from typing import Type, Tuple, Any, TypeVar, Final, get_origin, get_args
 from src.step.core import Step
-
-
-I: Final = TypeVar("I")
-O: Final = TypeVar("O")
+from src.step.vars import I, O
+from logging import Logger
+from typing import Type, Tuple, Any, get_origin, get_args
 
 
 def get_step_types(

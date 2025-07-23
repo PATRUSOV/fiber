@@ -3,7 +3,8 @@ from logging import Logger
 from typing import Optional, Type, Generic, Sequence
 
 from src.step import Step
-from src.step.types import I, O, get_step_types
+from src.step.types import get_step_types
+from src.step.vars import I, O
 import src.logman as lm
 
 

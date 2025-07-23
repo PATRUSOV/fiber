@@ -1,9 +1,9 @@
+import src.logman as lm
+
+from src.step.vars import I, O
 from abc import abstractmethod, ABC
 from logging import Logger
 from typing import Generic, Generator, Union
-
-import src.logman as lm
-from src.step.types import I, O
 
 
 class Step(ABC, Generic[I, O]):

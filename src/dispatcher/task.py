@@ -1,6 +1,7 @@
 from typing import Generator, Generic
 
-from src.step.types import I, O, get_step_types
+from src.step.vars import I, O
+from src.step.types import get_step_types
 from src.utils.types import impr_isinstance
 import src.logman as lm
 from src.collections import CallNode
