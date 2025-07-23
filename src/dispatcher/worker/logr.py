@@ -1,4 +1,4 @@
-import logman as lm
+import src.logman as lm
 
 from logging import Logger
 
