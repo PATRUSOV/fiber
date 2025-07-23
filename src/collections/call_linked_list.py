@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from logging import Logger
+from types import NoneType
 from typing import Optional, Type, Generic, Sequence
 
 from src.step import Step
@@ -72,7 +73,7 @@ def _check_first_and_last_steps_conract(
         TypeError: Если шаг нарушил конракт.
     """
     # ожидаемый тип, фактически заглушка
-    magic_type = None
+    magic_type = NoneType
     base_err_msg = "Нарушен контракт: "
     start_step, final_step = steps[0], steps[-1]
 
