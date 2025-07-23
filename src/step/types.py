@@ -2,43 +2,48 @@ import src.logman as lm
 
 from src.step.core import Step
 from src.step.vars import I, O
+from src.step.exceptions import (
+    NotAStepError,
+    StepTypeParameterCountMismatch,
+    StepTypeParametersMissing,
+    StepTypeExtractionError,
+)
 from logging import Logger
 from typing import Type, Tuple, Any, get_origin, get_args
 
 
 def get_step_types(
-    step: Type[Step[I, O]], logger: Logger = lm.get_kernel_logger()
+    step: Type[Step],
+    logger: Logger = lm.get_kernel_logger(),
 ) -> Tuple[Type[Any], Type[Any]]:
-    """
-    Возвращает входной и выходной тип шага.
-
-    Arguments:
-        step: Шаг.
-        logger: Логер используемый функцией, по умолчанию - логгер ядра фрейморка.
-
-    Returns:
-        Кортеж из типа входных данных и типа выходных данных.
-    """
+    # простая проверка на наследование от Step
     if not issubclass(step, Step):
-        error_mes = f"Шаг {step.__name__} не являеться наследником Step."
-        logger.fatal(error_mes, exc_info=True)
-        raise TypeError(error_mes)
+        error_msg = f"{step.__name__} не является наследником Step."
+        logger.fatal(error_msg)
+        raise NotAStepError(error_msg)
 
-    bases = getattr(step, "__orig_bases__", [])
-    for base_cls in bases:
-        if get_origin(base_cls) is Step:
-            args = get_args(base_cls)
+    # получение Generic-ов родителей (объектов класса typing._GenericAlias)
+    for base in getattr(step, "__orig_bases__", []):
+        # получение обекта класса
+        if get_origin(base) is Step:
+            # получение аргументов Generic-а
+            args = get_args(base)
+
+            # проврка на отсутвие арументов
+            if len(args) == 0:
+                error_msg = f"{step.__name__} унаследован от Step, но параметры типа не указаны."
+                logger.fatal(error_msg)
+                raise StepTypeParametersMissing(error_msg)
+
+            # проверка на недостаток / избыток аргументов
             if len(args) != 2:
-                error_mes = (
-                    f"Step должен иметь ровно два параметра типов, но получено: {args}"
-                )
-                logger.fatal(error_mes)
-                raise TypeError(error_mes)
+                error_msg = f"{step.__name__} должен наследовать Step с двумя параметрами типа, но получено {len(args)}: {args}"
+                logger.fatal(error_msg)
+                raise StepTypeParameterCountMismatch(error_msg)
 
             return args
 
-    error_mes = (
-        f"При наследовании от Step у {step.__name__} не указаны параметры типа [I, O]."
-    )
-    logger.fatal(error_mes, exc_info=True)
-    raise TypeError(error_mes)
+    # если Step[I, O] вообще не нашёлся
+    error_msg = f"{step.__name__} не содержит Step[...] в __orig_bases__ — возможно, Step скрыт в иерархии."
+    logger.fatal(error_msg)
+    raise StepTypeExtractionError(error_msg)
