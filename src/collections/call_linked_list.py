@@ -92,7 +92,7 @@ def _check_first_and_last_steps_conract(
     if final_step_outp_type is not magic_type:
         err_msg = (
             base_err_msg
-            + f"Тип вовращаемых данных в последнем шаге должен быть {magic_type}. Текущий тип: {start_step_inp_type}."
+            + f"Тип вовращаемых данных в последнем шаге должен быть {magic_type}. Текущий тип: {final_step_outp_type}."
         )
         logger.fatal(err_msg, exc_info=True)
         raise TypeError(err_msg)
