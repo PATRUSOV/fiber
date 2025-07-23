@@ -1,7 +1,6 @@
 import src.logman as lm
 
 from src.step.core import Step
-from src.step.vars import I, O
 from src.step.exceptions import (
     NotAStepError,
     StepTypeParameterCountMismatch,
