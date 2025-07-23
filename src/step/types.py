@@ -26,6 +26,8 @@ def get_step_types(
                 input_type, output_type = get_args(base_cls)
                 return input_type, output_type
 
-    error_mes = f"Шаг {step.__name__} не являеться наследником Step"
-    logger.fatal(error_mes)
+    error_mes = (
+        f"Шаг {step.__name__} не являеться наследником Step, или не указаны [I, O]."
+    )
+    logger.fatal(error_mes, exc_info=True)
     raise TypeError(error_mes)
