@@ -19,15 +19,26 @@ def get_step_types(
     Returns:
         Кортеж из типа входных данных и типа выходных данных.
     """
-    if issubclass(step, Step):
-        bases = getattr(step, "__orig_bases__", [])
-        for base_cls in bases:
-            if get_origin(base_cls) is Step:
-                input_type, output_type = get_args(base_cls)
-                return input_type, output_type
+    if not issubclass(step, Step):
+        error_mes = f"Шаг {step.__name__} не являеться наследником Step."
+        logger.fatal(error_mes, exc_info=True)
+        raise TypeError(error_mes)
+
+    bases = getattr(step, "__orig_bases__", [])
+    for base_cls in bases:
+        if get_origin(base_cls) is Step:
+            args = get_args(base_cls)
+            if len(args) != 2:
+                error_mes = (
+                    f"Step должен иметь ровно два параметра типов, но получено: {args}"
+                )
+                logger.fatal(error_mes)
+                raise TypeError(error_mes)
+
+            return args
 
     error_mes = (
-        f"Шаг {step.__name__} не являеться наследником Step, или не указаны [I, O]."
+        f"При наследовании от Step у {step.__name__} не указаны параметры типа [I, O]."
     )
     logger.fatal(error_mes, exc_info=True)
     raise TypeError(error_mes)
