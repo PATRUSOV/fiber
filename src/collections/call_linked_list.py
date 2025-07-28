@@ -120,7 +120,7 @@ def _check_first_and_last_steps_conract(
             + f"Тип принимаемых данных в первом шаге должен быть {magic_type}. Текущий тип: {start_step_inp_type}."
         )
         logger.fatal(err_msg, exc_info=True)
-        raise TypeError(err_msg)
+        raise IncompatibleStepTypesError(err_msg)
 
     # проверка возвращаемого значения в последем шаге
     final_step_outp_type = get_step_types(final_step)[1]
@@ -130,4 +130,4 @@ def _check_first_and_last_steps_conract(
             + f"Тип вовращаемых данных в последнем шаге должен быть {magic_type}. Текущий тип: {final_step_outp_type}."
         )
         logger.fatal(err_msg, exc_info=True)
-        raise TypeError(err_msg)
+        raise IncompatibleStepTypesError(err_msg)
