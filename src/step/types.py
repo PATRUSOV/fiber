@@ -1,12 +1,7 @@
 import src.logman as lm
 
 from src.step.core import Step
-from src.step.exceptions import (
-    NotAStepError,
-    StepTypeParameterCountMismatch,
-    StepTypeParametersMissing,
-    StepTypeExtractionError,
-)
+from src.step.exceptions import NotAStepError, StepTypeExtractionError
 from logging import Logger
 from typing import Type, Tuple, Any, get_origin, get_args
 
@@ -34,25 +29,12 @@ def get_step_types(
 
     Исключения:
         NotAStepError:
-            Брошено, если переданный класс не является наследником Step.
-
-        StepTypeParametersMissing:
-            Класс унаследован от Step, но параметров типов не указано вообще (Step без [I, O]).
-
-        StepTypeParameterCountMismatch:
-            Указано не два параметра типа (например, Step[int], Step[int, str, float]).
-
-        StepTypeExtractionError:
-            Step[...] не найден в __orig_bases__, вероятно, скрыт в глубокой иерархии.
+            Если переданный класс не является наследником Step.
 
     Пример:
         >>> class MyStep(Step[int, str]): ...
         >>> get_step_types(MyStep)
         (<class 'int'>, <class 'str'>)
-
-        >>> class InvalidStep(Step): ...
-        >>> get_step_types(InvalidStep)
-        # → StepTypeParametersMissing
 
         >>> class NotAStep: ...
         >>> get_step_types(NotAStep)
@@ -71,21 +53,8 @@ def get_step_types(
             # получение аргументов Generic-а
             args = get_args(base)
 
-            # проврка на отсутвие арументов
-            if len(args) == 0:
-                error_msg = f"{step.__name__} унаследован от Step, но параметры типа не указаны."
-                logger.fatal(error_msg)
-                raise StepTypeParametersMissing(error_msg)
-
-            # проверка на недостаток / избыток аргументов
-            if len(args) != 2:
-                error_msg = f"{step.__name__} должен наследовать Step с двумя параметрами типа, но получено {len(args)}: {args}"
-                logger.fatal(error_msg)
-                raise StepTypeParameterCountMismatch(error_msg)
-
             return args
 
-    # если Step[I, O] вообще не нашёлся
-    error_msg = f"{step.__name__} не содержит Step[...] в __orig_bases__ — возможно, Step скрыт в иерархии."
-    logger.fatal(error_msg)
+    error_msg = f"{step.__name__} не содержит Step[...] в __orig_bases__."
+    step.logger.fatal(error_msg)
     raise StepTypeExtractionError(error_msg)
