@@ -1,4 +1,4 @@
-from typing import Generator, Generic
+from typing import Generator, Generic, NoReturn
 
 from src.step.vars import I, O
 from src.step.types import get_step_types
@@ -61,8 +61,7 @@ class Task(Generic[I, O]):
         try:
             data = next(self._generator)
         except StopIteration:
-            self._is_done = True
-            raise TaskDone()
+            self._set_done()
 
         impr_isinstance(
             data=data,
@@ -72,8 +71,7 @@ class Task(Generic[I, O]):
         )
 
         if self._call_node.next is None:
-            self._is_done = True
-            raise TaskDone()
+            self._set_done()
 
         return Task(self._call_node.next, data)
 
@@ -98,9 +96,8 @@ class Task(Generic[I, O]):
         try:
             output = self._call_node.step.start(self._payload)
         except Exception as e:
-            self._call_node.step.logger.fatal(f"{e}")
-            self._kernel_logger.info("Программа завершена.")
-            raise
+            self._call_node.step.logger.fatal(f"{e}", exc_info=True)
+            self._set_done()
         else:
             self._call_node.step.logger.info("Метод start() успешно завершён.")
 
@@ -109,8 +106,12 @@ class Task(Generic[I, O]):
             try:
                 yield from generator
             except Exception as e:
-                self._call_node.step.logger.fatal(f"{e}")
-                self._kernel_logger.info("Программа завершена.")
-                raise
+                self._call_node.step.logger.fatal(f"{e}", exc_info=True)
+                self._set_done()
         else:
             yield output
+
+    def _set_done(self) -> NoReturn:
+        """Сигнализирует об остановкке таска."""
+        self._is_done = True
+        raise TaskDone()
