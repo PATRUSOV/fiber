@@ -1,9 +1,9 @@
 import src.logman as lm
 
-from src.step.core import Step
-from src.step.exceptions import NotAStepError, StepTypeExtractionError
 from logging import Logger
 from typing import Type, Tuple, Any, get_origin, get_args
+from src.step.core import Step
+from src.step.exceptions import NotAStepError, StepTypeParametersMissing
 
 
 def get_step_types(
@@ -55,6 +55,6 @@ def get_step_types(
 
             return args
 
-    error_msg = f"{step.__name__} не содержит Step[...] в __orig_bases__."
+    error_msg = f"{step.__name__} должен явно указывать параметры типа: Step[InputType, OutputType]"
     step.logger.fatal(error_msg)
-    raise StepTypeExtractionError(error_msg)
+    raise StepTypeParametersMissing(error_msg)

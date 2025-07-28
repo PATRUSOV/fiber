@@ -3,12 +3,8 @@ import src.logman as lm
 from src.step.vars import I, O
 from abc import abstractmethod, ABC
 from logging import Logger
-from typing import Generic, Generator, Union, get_args, get_origin
-from step.exceptions import (
-    StepTypeParameterCountMismatch,
-    StepTypeParametersMissing,
-    StepTypeExtractionError,
-)
+from typing import Generic, Generator, Union, get_origin
+from src.step.exceptions import StepTypeParametersMissing
 
 
 class Step(ABC, Generic[I, O]):
@@ -33,12 +29,6 @@ class Step(ABC, Generic[I, O]):
     Исключения:
         StepTypeParametersMissing:
             Параметры типов не указаны (Step без [I, O]).
-
-        StepTypeParameterCountMismatch:
-            Количесво параметров типов не равно двуx (например, Step[int], Step[int, str, float]).
-
-        StepTypeExtractionError:
-            Step[...] не найден в __orig_bases__, вероятно, скрыт в глубокой иерархии.
 
 
     Примеры:
@@ -120,24 +110,13 @@ class Step(ABC, Generic[I, O]):
         for base in getattr(cls, "__orig_bases__", []):
             # получение обекта класса
             if get_origin(base) is Step:
-                # получение аргументов Generic-а
-                args = get_args(base)
+                # если generic сгенерировал __orig_bases__ и там есть Step,
+                # то класс гарантированно инициализируется корректно
+                # (вся остальная валидация и так выполняеться в Generic)
 
-                # проверка на отсутствие аргументов
-                if len(args) == 0:
-                    error_msg = f"{cls.__name__} унаследован от Step, но параметры типа не указаны."
-                    cls.logger.fatal(error_msg)
-                    raise StepTypeParametersMissing(error_msg)
+                return
 
-                # проверка на недостаточное или избыточное количество аргументов
-                if len(args) != 2:
-                    error_msg = f"{cls.__name__} должен наследовать Step с двумя параметрами типа, но получено {len(args)}: {args}"
-                    cls.logger.fatal(error_msg)
-                    raise StepTypeParameterCountMismatch(error_msg)
-
-                break
-        else:
-            # если Step[I, O] вообще не нашёлся
-            error_msg = f"{cls.__name__} не содержит Step[...] в __orig_bases__."
-            cls.logger.fatal(error_msg)
-            raise StepTypeExtractionError(error_msg)
+        # если Step[I, O] вообще не нашёлся
+        error_msg = f"{cls.__name__} должен явно указывать параметры типа: Step[InputType, OutputType]"
+        cls.logger.fatal(error_msg)
+        raise StepTypeParametersMissing(error_msg)
