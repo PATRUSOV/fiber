@@ -98,7 +98,7 @@ class Task(Generic[I, O]):
         try:
             output = self._call_node.step.start(self._payload)
         except Exception as e:
-            self._call_node.step.logger.fatal(f"Критическая ошибка: {e}")
+            self._call_node.step.logger.fatal(f"{e}")
             self._kernel_logger.info("Программа завершена.")
             raise
         else:
@@ -109,7 +109,7 @@ class Task(Generic[I, O]):
             try:
                 yield from generator
             except Exception as e:
-                self._call_node.step.logger.fatal(f"Критическая ошибка: {e}")
+                self._call_node.step.logger.fatal(f"{e}")
                 self._kernel_logger.info("Программа завершена.")
                 raise
         else:
