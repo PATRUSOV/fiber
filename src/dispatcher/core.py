@@ -1,13 +1,12 @@
-from typing import Type, Sequence
 from threading import Thread
+from typing import Sequence, Type
 
 import src.logman as lm
-
-from src.step import Step
-from src.collections import get_call_head, ThreadSafeDeque
+from src.collections import ThreadSafeDeque, get_call_head
 from src.dispatcher.config import DispatcherConfig
 from src.dispatcher.task import Task
 from src.dispatcher.worker import Worker, WorkerContext
+from src.step import Step
 
 
 class Dispatcher:
