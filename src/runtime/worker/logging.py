@@ -1,6 +1,6 @@
-import src.logman as lm
-
 from logging import Logger
+
+import src.logman as lm
 
 worker_counter = 0
 

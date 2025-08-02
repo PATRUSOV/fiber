@@ -1,8 +1,8 @@
 from tsdeque import ThreadSafeDeque
 
 from src.utils.math.round import roundu
-from src.dispatcher.worker.logging import get_worker_logger
-from src.dispatcher.task import Task
+from src.runtime.task import Task
+from src.runtime.worker.logging import get_worker_logger
 
 
 class WorkerContext:

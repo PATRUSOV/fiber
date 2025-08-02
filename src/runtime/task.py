@@ -1,9 +1,9 @@
 from typing import Generator, Generic, NoReturn
 
+import src.logman as lm
 from src.step.vars import I, O
 from src.step.types import get_step_types
 from src.utils.types import impr_isinstance
-import src.logman as lm
 from src.collections import CallNode
 
 
