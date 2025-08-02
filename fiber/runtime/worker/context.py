@@ -1,8 +1,8 @@
 from tsdeque import ThreadSafeDeque
 
-from src.utils.math.round import roundu
-from src.runtime.task import Task
-from src.runtime.worker.logging import get_worker_logger
+from fiber.utils.math.round import roundu
+from fiber.runtime.task import Task
+from fiber.runtime.worker.logging import get_worker_logger
 
 
 class WorkerContext:

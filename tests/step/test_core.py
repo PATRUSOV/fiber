@@ -1,6 +1,6 @@
 import pytest
 
-from src.step import Step, StepTypeParametersMissing
+from fiber.step import Step, StepTypeParametersMissing
 
 
 def test_step_without_generic():

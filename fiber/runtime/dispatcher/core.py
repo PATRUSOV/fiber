@@ -2,12 +2,12 @@ from threading import Thread
 from typing import Sequence, Type
 from tsdeque import ThreadSafeDeque
 
-from src.logging import get_kernel_logger
-from src.collections import get_call_head
-from src.step import Step
-from src.runtime.dispatcher.config import DispatcherConfig
-from src.runtime.worker import Worker, WorkerContext
-from src.runtime.task import Task
+from fiber.logging import get_kernel_logger
+from fiber.collections import get_call_head
+from fiber.step import Step
+from fiber.runtime.dispatcher.config import DispatcherConfig
+from fiber.runtime.worker import Worker, WorkerContext
+from fiber.runtime.task import Task
 
 
 class Dispatcher:

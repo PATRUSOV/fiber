@@ -1,5 +1,5 @@
-from src.runtime.task import TaskDone
-from src.runtime.worker.context import WorkerContext
+from fiber.runtime.task import TaskDone
+from fiber.runtime.worker.context import WorkerContext
 
 
 class Worker:

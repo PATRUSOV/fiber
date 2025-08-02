@@ -1,7 +1,7 @@
 import pytest
 
-from src.collections import get_call_head, IncompatibleStepTypesError
-from src.step import Step
+from fiber.collections import get_call_head, IncompatibleStepTypesError
+from fiber.step import Step
 
 
 class StartStep(Step[None, int]): ...

@@ -1,6 +1,6 @@
 from logging import Logger
 
-from src.logging import get_kernel_logger
+from fiber.logging import get_kernel_logger
 
 worker_counter = 0
 

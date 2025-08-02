@@ -1,9 +1,9 @@
 from logging import Logger
 from typing import Type, Tuple, Any, get_origin, get_args
 
-from src.logging import get_kernel_logger
-from src.step.core import Step
-from src.step.exceptions import NotAStepError, StepTypeParametersMissing
+from fiber.logging import get_kernel_logger
+from fiber.step.core import Step
+from fiber.step.exceptions import NotAStepError, StepTypeParametersMissing
 
 
 def get_step_types(

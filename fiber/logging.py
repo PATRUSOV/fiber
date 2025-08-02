@@ -1,6 +1,6 @@
 import logging
 
-from src import __appname__
+from fiber import __appname__
 
 # TODO:
 # + Добавить документация

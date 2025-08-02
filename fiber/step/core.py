@@ -2,9 +2,9 @@ from abc import abstractmethod, ABC
 from logging import Logger
 from typing import Generic, Generator, Union, get_origin
 
-from src.logging import get_main_step_logger
-from src.step.vars import I, O
-from src.step.exceptions import StepTypeParametersMissing
+from fiber.logging import get_main_step_logger
+from fiber.step.vars import I, O
+from fiber.step.exceptions import StepTypeParametersMissing
 
 
 class Step(ABC, Generic[I, O]):

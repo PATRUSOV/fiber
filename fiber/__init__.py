@@ -4,7 +4,7 @@ __appname__ = "Fiber"
 
 __all__ = []
 
-from src.logging import get_main_logger
+from fiber.logging import get_main_logger
 
 from logging import Formatter, StreamHandler
 

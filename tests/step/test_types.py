@@ -1,6 +1,6 @@
 import pytest
 
-from src.step import Step, get_step_types, NotAStepError
+from fiber.step import Step, get_step_types, NotAStepError
 
 
 def test_getting_valid_step_types():

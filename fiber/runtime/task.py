@@ -1,10 +1,10 @@
 from typing import Generator, Generic, NoReturn
 
-from src.logging import get_kernel_logger
-from src.step.vars import I, O
-from src.step.types import get_step_types
-from src.utils.types import impr_isinstance
-from src.collections import CallNode
+from fiber.logging import get_kernel_logger
+from fiber.step.vars import I, O
+from fiber.step.types import get_step_types
+from fiber.utils.types import impr_isinstance
+from fiber.collections import CallNode
 
 
 class TaskDone(Exception): ...

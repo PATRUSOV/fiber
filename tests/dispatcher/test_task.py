@@ -1,9 +1,9 @@
 from typing import Generator
 import pytest
 
-from src.dispatcher.task import Task, TaskDone
-from src.step import Step
-from src.collections import get_call_head
+from fiber.runtime.task import Task, TaskDone
+from fiber.step import Step
+from fiber.collections import get_call_head
 
 
 @pytest.fixture
