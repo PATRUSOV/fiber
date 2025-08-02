@@ -1,18 +1,16 @@
 from tsdeque import ThreadSafeDeque
 
 from fiber.utils.math.round import roundu
-from fiber.runtime.task import Task
-from fiber.runtime.worker.logging import get_worker_logger
 
 
-class WorkerContext:
+class DequeContext:
     """
-    Контекст для Worker. Расчитывает лимит генерации и хранит данные необходимые Worker.
+    Контекст для Deque. Расчитывает лимит генераци.
     """
 
     def __init__(
         self,
-        deque: ThreadSafeDeque[Task | None],
+        deque: ThreadSafeDeque,
         deque_limit: int,
         max_tasks_per_iter: int,
     ):
@@ -20,23 +18,22 @@ class WorkerContext:
         Создает контекст для исполнения Worker.
 
         Args:
-            deque: Двустороння очередь с которой будет работать Worker.
+            deque: Двустороння очередь.
             deque_limit: Предел к которому стремиться размер очереди (при приближении к нему генерация замедляется).
             max_task_per_iter: Максимальное колиство задач которые воркер может сгенерировать за одно обращение к очереди.
         """
-        self.deque = deque
-        self.logger = get_worker_logger()
+        self._deque = deque
         self._deque_limit = deque_limit
         self._max_tasks_per_iter = max_tasks_per_iter
-        self.logger.debug(
-            f"Создан контекс выполнения. Лимит задач: {self._deque_limit}. Лимит генерации за обращение к очереди: {self._max_tasks_per_iter}. Лимит генерацииобращение к очереди: {self._max_tasks_per_iter}"
-        )
+
+    def get_deque(self) -> ThreadSafeDeque:
+        return self._deque
 
     def get_generation_limit(self) -> int:
         """
         Вычисляет количесво задач которые воркер сможет сгенерировать за одно обращение к очереди.
         """
-        queue_size = len(self.deque)
+        queue_size = len(self._deque)
         deque_lim = self._deque_limit
         max_task_per_iter = self._max_tasks_per_iter
 

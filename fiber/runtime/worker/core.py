@@ -1,5 +1,6 @@
 from fiber.runtime.task import TaskDone
-from fiber.runtime.worker.context import WorkerContext
+from fiber.runtime.deque.context import DequeContext
+from fiber.runtime.worker.logging import get_worker_logger
 
 
 class Worker:
@@ -7,16 +8,16 @@ class Worker:
     Воркер для многопоточной обработки Task().
     """
 
-    def __init__(self, context: WorkerContext):
+    def __init__(self, deque_context: DequeContext):
         """
         Создает воркера для многопоточной обработки Task().
 
         Args:
-            context: Контекст в котором будет работать воркер (см. подробнее в доках к WorkerContext).
+            deque_context: Контекст управляющий очередью в котором будет работать воркер (см. подробнее в доках к DequeContext).
         """
-        self._context = context
-        self._deque = context.deque
-        self._logger = context.logger
+        self._deque_context = deque_context
+        self._deque = deque_context.get_deque()
+        self._logger = get_worker_logger()
 
     def run(self) -> None:
         """
@@ -32,7 +33,7 @@ class Worker:
 
             task = item
 
-            generation_lim = self._context.get_generation_limit()
+            generation_lim = self._deque_context.get_generation_limit()
             self._logger.debug(
                 f"Начал выполнение Task. Лимит генерации: {generation_lim}"
             )

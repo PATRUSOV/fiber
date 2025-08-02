@@ -5,8 +5,9 @@ from tsdeque import ThreadSafeDeque
 from fiber.logging import get_kernel_logger
 from fiber.collections import get_call_head
 from fiber.step import Step
+from fiber.runtime.deque.context import DequeContext
 from fiber.runtime.dispatcher.config import DispatcherConfig
-from fiber.runtime.worker import Worker, WorkerContext
+from fiber.runtime.worker import Worker
 from fiber.runtime.task import Task
 
 
@@ -53,12 +54,12 @@ class Dispatcher:
         workers = self._config.WORKERS
         self._logger.debug("Создание Worker-ов...")
         for _ in range(workers):
-            context = WorkerContext(
+            deque_context = DequeContext(
                 deque=self._tdeque,
                 deque_limit=self._config.TASK_LIMIT,
                 max_tasks_per_iter=self._config.TASKS_PER_ITER,
             )
-            worker = Worker(context)
+            worker = Worker(deque_context)
             thread = Thread(target=worker.run)
             thread.start()
             threads.append(thread)
