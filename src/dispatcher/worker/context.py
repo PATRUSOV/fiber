@@ -1,6 +1,6 @@
 from tsdeque import ThreadSafeDeque
 
-from src.dispatcher.worker.logr import get_worker_logger
+from src.dispatcher.worker.logging import get_worker_logger
 from src.dispatcher.task import Task
 
 
