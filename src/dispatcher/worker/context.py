@@ -1,5 +1,6 @@
 from tsdeque import ThreadSafeDeque
 
+from src.utils.math.round import roundu
 from src.dispatcher.worker.logging import get_worker_logger
 from src.dispatcher.task import Task
 
@@ -40,6 +41,6 @@ class WorkerContext:
         max_task_per_iter = self._max_tasks_per_iter
 
         usage = queue_size / deque_lim
-        raw_tasks = round(max_task_per_iter * (1 - usage))
+        raw_tasks = roundu(max_task_per_iter * (1 - usage))
 
         return max(1, raw_tasks)
