@@ -1,9 +1,9 @@
-import src.logman as lm
-
-from src.step.vars import I, O
 from abc import abstractmethod, ABC
 from logging import Logger
 from typing import Generic, Generator, Union, get_origin
+
+from src.logging import get_main_step_logger
+from src.step.vars import I, O
 from src.step.exceptions import StepTypeParametersMissing
 
 
@@ -99,7 +99,7 @@ class Step(ABC, Generic[I, O]):
     @classmethod
     def _init_logger(cls) -> None:
         """Передает наследнику логгер."""
-        cls.logger = lm.get_main_step_logger().getChild(cls.__name__)
+        cls.logger = get_main_step_logger().getChild(cls.__name__)
 
     @classmethod
     def _validate_generic_params(cls) -> None:

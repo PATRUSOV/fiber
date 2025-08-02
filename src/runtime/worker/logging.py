@@ -1,6 +1,6 @@
 from logging import Logger
 
-import src.logman as lm
+from src.logging import get_kernel_logger
 
 worker_counter = 0
 
@@ -14,7 +14,7 @@ def get_worker_logger() -> Logger:
         Logger унаследованный от логера ядра.
     """
     global worker_counter
-    kernel_logger = lm.get_kernel_logger()
+    kernel_logger = get_kernel_logger()
     worker_logger = kernel_logger.getChild(f"worker-{worker_counter}")
     worker_counter += 1
     return worker_logger

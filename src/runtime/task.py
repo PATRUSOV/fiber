@@ -1,6 +1,6 @@
 from typing import Generator, Generic, NoReturn
 
-import src.logman as lm
+from src.logging import get_kernel_logger
 from src.step.vars import I, O
 from src.step.types import get_step_types
 from src.utils.types import impr_isinstance
@@ -29,7 +29,7 @@ class Task(Generic[I, O]):
         """
         self._call_node = call_node
         self._payload = payload
-        self._kernel_logger = lm.get_kernel_logger()
+        self._kernel_logger = get_kernel_logger()
         self._is_done = False
         self._generator = None  # Отложенно инициализируемый генератор
         self._input_type, self._output_type = get_step_types(self._call_node.step)

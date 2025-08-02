@@ -3,12 +3,11 @@ from logging import Logger
 from types import NoneType
 from typing import Optional, Type, Generic, Sequence
 
+from src.logging import get_kernel_logger
 from src.step import Step
 from src.step.types import get_step_types
 from src.step.vars import I, O
 from src.collections.exceptions import IncompatibleStepTypesError
-
-import src.logman as lm
 
 
 @dataclass
@@ -27,7 +26,7 @@ class CallNode(Generic[I, O]):
 
 
 def get_call_head(
-    steps: Sequence[Type[Step]], logger: Logger = lm.get_kernel_logger()
+    steps: Sequence[Type[Step]], logger: Logger = get_kernel_logger()
 ) -> CallNode:
     """
     Преобразует последовательность из Type[Step] в односвязный список из CallNode.

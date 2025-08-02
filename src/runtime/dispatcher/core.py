@@ -2,7 +2,7 @@ from threading import Thread
 from typing import Sequence, Type
 from tsdeque import ThreadSafeDeque
 
-import src.logman as lm
+from src.logging import get_kernel_logger
 from src.collections import get_call_head
 from src.step import Step
 from src.runtime.dispatcher.config import DispatcherConfig
@@ -31,7 +31,7 @@ class Dispatcher:
             config: Объект конфигурации (см. подробнее в его доках).
         """
 
-        self._logger = lm.get_kernel_logger()
+        self._logger = get_kernel_logger()
         self._config = config
         self._tdeque: ThreadSafeDeque[Task | None] = ThreadSafeDeque()
 

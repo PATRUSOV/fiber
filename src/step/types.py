@@ -1,14 +1,14 @@
-import src.logman as lm
-
 from logging import Logger
 from typing import Type, Tuple, Any, get_origin, get_args
+
+from src.logging import get_kernel_logger
 from src.step.core import Step
 from src.step.exceptions import NotAStepError, StepTypeParametersMissing
 
 
 def get_step_types(
     step: Type[Step],
-    logger: Logger = lm.get_kernel_logger(),
+    logger: Logger = get_kernel_logger(),
 ) -> Tuple[Type[Any], Type[Any]]:
     """
     Извлекает параметры типов входа и выхода (I, O) из generic-наследника класса Step.
