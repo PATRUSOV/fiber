@@ -1,4 +1,5 @@
-from src.collections import ThreadSafeDeque
+from tsdeque import ThreadSafeDeque
+
 from src.dispatcher.worker.logr import get_worker_logger
 from src.dispatcher.task import Task
 
@@ -37,6 +38,8 @@ class WorkerContext:
         queue_size = len(self.deque)
         deque_lim = self._deque_limit
         max_task_per_iter = self._max_tasks_per_iter
+
         usage = queue_size / deque_lim
         raw_tasks = round(max_task_per_iter * (1 - usage))
+
         return max(1, raw_tasks)
