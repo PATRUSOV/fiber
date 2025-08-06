@@ -1,14 +1,13 @@
+import pytest
 from typing import Generic, List, Sequence, Tuple, Type, TypeVar
 
-import pytest
-
-from fiber.pipeline.task.builder.exceptions import (
+from fiber.step import Step
+from fiber.pipeline.task.builder.validation import (
+    StepSequenceValidator,
+    EmptySequenceError,
     IncompatibleStepTypesError,
     InvalidPipelineEndpointsError,
-    SequenceIsEmpty,
 )
-from fiber.pipeline.task.builder.validation import StepSequenceValidator
-from fiber.step import Step
 
 
 class StartStep(Step[None, int]): ...
@@ -33,7 +32,7 @@ def test_build_from_valid_step_sequence(valid_steps: Tuple[Type[Step], ...]):
 
 
 def test_with_empty_sequence():
-    with pytest.raises(SequenceIsEmpty):
+    with pytest.raises(EmptySequenceError):
         StepSequenceValidator.validate([])
 
 

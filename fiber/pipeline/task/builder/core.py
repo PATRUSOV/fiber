@@ -3,7 +3,11 @@ from typing import Sequence, Type
 from fiber.step import Step
 from fiber.pipeline.task.core import Task
 from fiber.pipeline.task.utils.datastructs import get_linked_list_from
-from fiber.pipeline.task.builder.validation import StepSequenceValidator
+from fiber.pipeline.task.builder.validation import (
+    StepSequenceValidator,
+    StepSequenceValidationError,
+)
+from fiber.pipeline.task.builder.exceptions import TaskBuildError
 
 
 class TaskBuilder:
@@ -14,7 +18,10 @@ class TaskBuilder:
         strict_runtime_types: bool,
     ) -> Task:
         if strict_building_types:
-            StepSequenceValidator.validate(steps)
+            try:
+                StepSequenceValidator.validate(steps)
+            except StepSequenceValidationError as e:
+                raise TaskBuildError() from e
 
         call_linked_list_head = get_linked_list_from(steps)
         task = Task(
