@@ -14,4 +14,4 @@ def test_getting_not_a_step_types():
     class NotAStep: ...
 
     with pytest.raises(NotAStepError):
-        get_step_types(NotAStep)
+        get_step_types(NotAStep)  # type: ignore (тест на шаг который не наследует Step)

@@ -1,5 +1,6 @@
 from fiber.step.core import Step
 from fiber.step.types import get_step_types
+from fiber.step.vars import I, O
 from fiber.step.exceptions import (
     NotAStepError,
     StepTypeParametersMissing,
@@ -11,4 +12,6 @@ __all__ = [
     "get_step_types",
     "NotAStepError",
     "StepTypeParametersMissing",
+    "I",
+    "O",
 ]
