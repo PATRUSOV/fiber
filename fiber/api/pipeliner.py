@@ -14,7 +14,7 @@ class Pipeliner:
         return self
 
     def run(self) -> None:
-        dispatcher = Runtime(
+        Runtime(
             tasks_provider=TaskProvider(self._pipeline_builder),
             config=self._runtime_config,
         ).run()
