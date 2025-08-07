@@ -11,7 +11,6 @@ from fiber.step import Step
 __all__ = [
     "Step",
     "Pipeliner",
-    "PipelineBuilder",
     "RuntimeConfig",
     "get_main_logger",
 ]
