@@ -8,11 +8,11 @@ from fiber.pipeline.task.builder.validation.rules.base import (
 
 
 class EmptySequenceError(StepSequenceValidationError):
-    """Первый шаг должен принимать None, а последний возвращать."""
+    """Последовательность шагов пуста."""
 
 
 class NotEmptySequenceRule(StepSequenceValidationRule):
     @classmethod
     def check(cls, steps: Sequence[Type[Step]]) -> None:
         if len(steps) == 0:
-            raise EmptySequenceError()
+            raise EmptySequenceError("Последовательность шагов пуста.")
