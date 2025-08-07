@@ -4,12 +4,14 @@ from fiber.pipeline.task.builder.validation.rules import (
     IncompatibleStepTypesError,
     EmptySequenceError,
     InvalidPipelineEndpointsError,
+    NotAStepError,
 )
 
 _rules_exceptions = [
     "IncompatibleStepTypesError",
     "EmptySequenceError",
     "InvalidPipelineEndpointsError",
+    "NotAStepError",
 ]
 
 __all__ = [

@@ -3,6 +3,7 @@ from typing import Sequence, Type
 from fiber.step import Step
 from fiber.pipeline.task.builder.validation.rules import (
     StepTypeCompatibilityRule,
+    OnlyStepSubclassesRule,
     EndPointsRule,
     NotEmptySequenceRule,
 )
@@ -17,6 +18,7 @@ class StepSequenceValidator:
     def validate(steps: Sequence[Type[Step]]) -> None:
         validation_rules = (
             NotEmptySequenceRule,
+            OnlyStepSubclassesRule,
             StepTypeCompatibilityRule,
             EndPointsRule,
         )

@@ -7,6 +7,7 @@ from fiber.pipeline.task.builder.validation import (
     EmptySequenceError,
     IncompatibleStepTypesError,
     InvalidPipelineEndpointsError,
+    NotAStepError,
 )
 
 
@@ -87,3 +88,10 @@ def test_build_from_steps_with_invalid_typed_generics():
 
     with pytest.raises(IncompatibleStepTypesError):
         StepSequenceValidator.validate([StartStep, FinalStep])
+
+
+def test_sequence_with_incorrect_steps():
+    class NotAStep: ...
+
+    with pytest.raises(NotAStepError):
+        StepSequenceValidator.validate([StartStep, NotAStep, FinalStep])  # type: ignore
