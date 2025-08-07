@@ -21,7 +21,7 @@ class TaskBuilder:
             try:
                 StepSequenceValidator.validate(steps)
             except StepSequenceValidationError as e:
-                raise TaskBuildError() from e
+                raise TaskBuildError(str(e)) from e
 
         call_linked_list_head = get_linked_list_from(steps)
         task = Task(
