@@ -9,14 +9,14 @@ from fiber.pipeline.task.builder.validation.rules.base import (
 
 
 class InvalidPipelineEndpointsError(StepSequenceValidationError):
-    """Первый шаг должен принимать None, а последний возвращать None."""
+    """Первый шаг должен принимать None, а последний возвращать."""
 
 
 class EndPointsRule(StepSequenceValidationRule):
     @classmethod
     def check(cls, steps: Sequence[Type[Step]]) -> None:
         """
-        Проверяет что первый шаг принимает None, а последний возвращает None.
+        Проверяет что первый шаг принимает None, а последний возвращает.
         """
         magic_type = NoneType
         start_step, final_step = steps[0], steps[-1]
